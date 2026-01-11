@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pet {
+  id        String   @id @default(cuid())
+  ownerId   String   // Uproszczenie: ID właściciela jako string (w przyszłości relacja do User)
+  name      String
+  species   String
+  breed     String?
+  sex       String   @default("unknown")
+  weight    Float
+  birthDate DateTime
+  notes     String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visits    Visit[]
+}
+
+model Visit {
+  id          String   @id @default(cuid())
+  date        DateTime
+  type        String
+  status      String   @default("planowana") // np. planowana, zakonczona
+  price       Float
+  description String
+  diagnosis   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  vetId       String   // ID weterynarza
+}
