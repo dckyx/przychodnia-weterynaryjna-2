@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,35 +10,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  name      String   
+  lastName  String   
+  email     String   @unique
+  phone     String
+  role      String   @default("owner") // "owner" | "vet" | "admin"
+  address   String?  
+  
+  pets      Pet[]    @relation("OwnerPets")
+  vetVisits Visit[]  @relation("VetVisits")
+  
+  createdAt DateTime @default(now())
+}
+
 model Pet {
-  id        String   @id @default(cuid())
-  ownerId   String   // Uproszczenie: ID właściciela jako string (w przyszłości relacja do User)
+  id        String   @id @default(uuid())
   name      String
-  species   String
+  species   String   // "pies" | "kot" | "inne" 
+  sex       String   // "male" | "female" | "unknown"
   breed     String?
-  sex       String   @default("unknown")
   weight    Float
   birthDate DateTime
   notes     String?
   imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
+  ownerId   String
+  owner     User     @relation("OwnerPets", fields: [ownerId], references: [id])
+  
   visits    Visit[]
+  
+  createdAt DateTime @default(now())
 }
 
 model Visit {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   date        DateTime
   type        String
-  status      String   @default("planowana") // np. planowana, zakonczona
+  status      String
   price       Float
   description String
   diagnosis   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
   petId       String
   pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-  vetId       String   // ID weterynarza
+
+  vetId       String
+  vet         User     @relation("VetVisits", fields: [vetId], references: [id])
+  
+  createdAt   DateTime @default(now())
 }

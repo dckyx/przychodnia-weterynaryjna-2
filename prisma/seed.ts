@@ -1,6 +1,8 @@
-import { User, Pet, Visit } from "@/types";
+import { PrismaClient } from "@prisma/client";
 
-export const users: User[] = [
+const prisma = new PrismaClient();
+
+const users = [
   {
     id: "vt1",
     name: "Karol",
@@ -73,7 +75,7 @@ export const users: User[] = [
   },
 ];
 
-export const pets: Pet[] = [
+const pets = [
   {
     id: "pet1",
     ownerId: "ow1",
@@ -100,7 +102,7 @@ export const pets: Pet[] = [
   },
 ];
 
-export const visits: Visit[] = [
+const visits = [
   {
     id: "vis1",
     petId: "pet1",
@@ -157,3 +159,56 @@ export const visits: Visit[] = [
     diagnosis: undefined,
   },
 ];
+
+// --- LOGIKA SEEDOWANIA ---
+
+async function main() {
+  console.log("Seeding db");
+
+  await prisma.visit.deleteMany();
+
+  await prisma.pet.deleteMany();
+
+  await prisma.user.deleteMany();
+
+  console.log("Old data removed");
+
+  for (const user of users) {
+    await prisma.user.create({
+      data: user,
+    });
+  }
+  console.log(`Added ${users.length} users`);
+
+  for (const pet of pets) {
+    await prisma.pet.create({
+      data: {
+        ...pet,
+        birthDate: new Date(pet.birthDate), //konwersja na date
+      },
+    });
+  }
+  console.log(`Added ${pets.length} pets`);
+
+  for (const visit of visits) {
+    await prisma.visit.create({
+      data: {
+        ...visit,
+        date: new Date(visit.date), // konwersja na date
+      },
+    });
+  }
+  console.log(`Added ${visits.length} visits.`);
+
+  console.log("Seeding success bracie");
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
