@@ -5,7 +5,7 @@ import { LucideLogOut, LucidePawPrint, LucideCalendar } from "lucide-react";
 
 export default async function Navbar() {
   const session = await getSession();
-  const role = session?.role?.trim().toLowerCase();
+  const role = session?.role;
   const isVet = role === "vet" || role === "admin";
 
   return (
@@ -15,14 +15,14 @@ export default async function Navbar() {
           {/* LEWA STRONA: LOGO + MENU */}
           <div className="flex items-center">
             <Link
-              href={session?.userId ? "/dashboard" : "/"}
+              href={"/"}
               className="flex items-center gap-2 text-xl font-bold text-blue-600"
             >
               <LucidePawPrint />
-              <span>Przychodnia</span>
+              <span>Weteryniarz</span>
             </Link>
 
-            {session?.userId && (
+            {!!session?.userId && (
               <div className="hidden md:flex ml-10 space-x-8">
                 <Link
                   href="/dashboard"
@@ -52,15 +52,6 @@ export default async function Navbar() {
           <div className="flex items-center gap-4">
             {session?.userId ? (
               <div className="flex items-center gap-6">
-                {/* 1. ZMIANA: Klikalny napis zamiast zwykłego tekstu */}
-                <Link
-                  href="/dashboard"
-                  className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition"
-                  title="Wróć do pulpitu"
-                >
-                  {isVet ? "👨‍⚕️ Panel Lekarza" : "👤 Panel Klienta"}
-                </Link>
-
                 {/* 2. ZMIANA: Usunięto ikonkę profilu (LucideUser) */}
 
                 <form action={logoutAction}>
@@ -76,7 +67,7 @@ export default async function Navbar() {
               <div className="flex gap-4">
                 <Link
                   href="/login"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
+                  className="text-gray-700 px-4 py-2 hover:text-blue-600 font-medium"
                 >
                   Zaloguj
                 </Link>
